@@ -1,4 +1,4 @@
-FROM arm64v8/node:12.22.1-stretch as builder
+FROM arm64v8/node:18-buster as builder
 
 # crafted and tuned by pierre@ozoux.net and sing.li@rocket.chat
 MAINTAINER buildmaster@rocket.chat
@@ -21,7 +21,7 @@ ENV RC_VERSION 4.1.2
 
 WORKDIR /app
 
-RUN apt-get update && apt-get -y install g++ build-essential
+RUN apt-get update && apt-get -y install python g++ build-essential
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get install -y curl ca-certificates imagemagick --no-install-recommends 
 RUN apt-get install libstdc++6
@@ -36,6 +36,8 @@ ADD . /app
 
 RUN set -x \
  && cd /app/bundle/programs/server \
+ && npm install -g node-gyp-install \
+ && npm install -g npm \
  && npm install \
  # Start hack for sharp...
  && rm -rf npm/node_modules/sharp \
@@ -49,7 +51,7 @@ RUN set -x \
  && npm rebuild bcrypt --build-from-source \
  && npm cache clear --force
 
-FROM arm64v8/node:12.22.1-stretch
+FROM arm64v8/node:18-buster
 
 RUN groupadd -r rocketchat \
 &&  useradd -r -g rocketchat rocketchat \
